@@ -1,9 +1,7 @@
-pub mod delegated;
 pub mod signatory;
 
 use crate::error::Error;
 use crate::prefix::{IdentifierPrefix, SelfAddressingPrefix};
-use delegated::DelegatedIdentifierState;
 use signatory::Signatory;
 
 /// Identifier State
@@ -16,7 +14,7 @@ pub struct IdentifierState {
     pub last: SelfAddressingPrefix,
     pub current: Signatory,
     pub next: SelfAddressingPrefix,
-    pub delegated_keys: Vec<DelegatedIdentifierState>,
+    pub delegates: Vec<IdentifierState>,
     pub tally: usize,
     pub witnesses: Vec<IdentifierPrefix>,
 }
