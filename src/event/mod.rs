@@ -13,7 +13,6 @@ pub struct Event {
     #[serde(rename = "pre")]
     pub prefix: IdentifierPrefix,
 
-    // TODO a backhash/digest of previous message?
     // TODO write as hex string
     pub sn: u64,
 
@@ -40,6 +39,14 @@ impl EventSemantics for Event {
                     return Err(Error::SemanticError("SN is not correct".to_string()));
                 }
             }
+            EventData::Dip(ev) => IdentifierState {
+                delegates: [
+                    state.delegates,
+                    vec![ev.apply_to(IdentifierState::default())?],
+                ]
+                .concat(),
+                ..state
+            },
             _ => {
                 // prefix must equal. sn must be incremented
                 if self.prefix != state.prefix {

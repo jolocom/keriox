@@ -34,7 +34,7 @@ pub struct InceptionWitnessConfig {
     pub initial_witnesses: Vec<IdentifierPrefix>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct DelegatedEventSeal {
     #[serde(rename = "id")]
     pub prefix: IdentifierPrefix,

@@ -1,13 +1,14 @@
 pub mod signatory;
 
 use crate::error::Error;
+use crate::event::sections::DelegatedEventSeal;
 use crate::prefix::{IdentifierPrefix, SelfAddressingPrefix};
 use signatory::Signatory;
 
 /// Identifier State
 ///
 /// represents the accumulated state after applying events, based on section 13 of the paper
-#[derive(Default, PartialEq, Debug)]
+#[derive(Default, PartialEq, Debug, Clone)]
 pub struct IdentifierState {
     pub prefix: IdentifierPrefix,
     pub sn: u64,
@@ -15,6 +16,7 @@ pub struct IdentifierState {
     pub current: Signatory,
     pub next: SelfAddressingPrefix,
     pub delegates: Vec<IdentifierState>,
+    pub open_seals: Vec<DelegatedEventSeal>,
     pub tally: usize,
     pub witnesses: Vec<IdentifierPrefix>,
 }
