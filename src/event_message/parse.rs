@@ -29,7 +29,7 @@ fn cbor_message(s: &str) -> nom::IResult<&str, EventMessage> {
 
 fn mgpk_message(s: &str) -> nom::IResult<&str, EventMessage> {
     let mut deser = serde_mgpk::Deserializer::new(Cursor::new(s));
-    match Deserialize::deserialize(&mut deser) {
+    match EventMessage::deserialize(&mut deser) {
         Ok(msg) => Ok((&s[deser.get_ref().position() as usize..], msg)),
         _ => Err(nom::Err::Error((s, ErrorKind::IsNot))),
     }
@@ -57,21 +57,11 @@ fn cbor_sed_block(s: &[u8]) -> Result<Vec<u8>, Error> {
     Ok(res)
 }
 
-fn cbor_json_block(s: &[u8]) -> Result<String, Error> {
+fn mgpk_sed_block(s: &[u8]) -> Result<Vec<u8>, Error> {
     let mut res = Vec::with_capacity(128);
     transcode(
-        &mut serde_cbor::Deserializer::from_slice(s),
-        &mut serde_json::Serializer::new(&mut res),
-    )?;
-    // serde-json guarentees correct utf-8 output
-    Ok(String::from_utf8(res).unwrap())
-}
-
-fn json_cbor_block(s: &str) -> Result<Vec<u8>, Error> {
-    let mut res = Vec::with_capacity(128);
-    transcode(
-        &mut serde_json::Deserializer::from_str(s),
-        &mut serde_cbor::Serializer::new(&mut res),
+        &mut serde_mgpk::Deserializer::from_read_ref(s),
+        &mut dfs_serializer::Serializer::new(&mut res),
     )?;
     Ok(res)
 }
@@ -100,8 +90,20 @@ fn cbor_sed(s: &[u8]) -> nom::IResult<&[u8], Vec<u8>> {
     }
 }
 
+fn mgpk_sed(s: &[u8]) -> nom::IResult<&[u8], Vec<u8>> {
+    let mut deser = serde_mgpk::Deserializer::new(Cursor::new(s));
+    match EventMessage::deserialize(&mut deser) {
+        Ok(_) => Ok((
+            &s[deser.get_ref().position() as usize..],
+            mgpk_sed_block(&s[deser.get_ref().position() as usize..])
+                .map_err(|_| nom::Err::Error((s, ErrorKind::IsNot)))?,
+        )),
+        _ => Err(nom::Err::Error((s, ErrorKind::IsNot))),
+    }
+}
+
 pub fn sed(s: &[u8]) -> nom::IResult<&[u8], Vec<u8>> {
-    alt((json_sed, cbor_sed))(s)
+    alt((json_sed, cbor_sed, mgpk_sed))(s)
 }
 
 /// extracts the count from the sig count code
