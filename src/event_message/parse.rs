@@ -6,8 +6,10 @@ use crate::{
     util::dfs_serializer,
 };
 use nom::{branch::*, combinator::*, error::ErrorKind, multi::*, sequence::*};
+use rmp_serde as serde_mgpk;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_transcode::transcode;
+use std::io::Cursor;
 
 fn json_message(s: &str) -> nom::IResult<&str, EventMessage> {
     let mut stream = serde_json::Deserializer::from_slice(s.as_bytes()).into_iter::<EventMessage>();
@@ -25,8 +27,16 @@ fn cbor_message(s: &str) -> nom::IResult<&str, EventMessage> {
     }
 }
 
+fn mgpk_message(s: &str) -> nom::IResult<&str, EventMessage> {
+    let mut deser = serde_mgpk::Deserializer::new(Cursor::new(s));
+    match Deserialize::deserialize(&mut deser) {
+        Ok(msg) => Ok((&s[deser.get_ref().position() as usize..], msg)),
+        _ => Err(nom::Err::Error((s, ErrorKind::IsNot))),
+    }
+}
+
 fn message(s: &str) -> nom::IResult<&str, EventMessage> {
-    alt((json_message, cbor_message))(s)
+    alt((json_message, cbor_message, mgpk_message))(s)
 }
 
 fn json_sed_block(s: &[u8]) -> Result<Vec<u8>, Error> {
