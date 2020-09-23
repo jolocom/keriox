@@ -1,7 +1,7 @@
 [package]
 name = "keri"
-version = "0.1.2"
-authors = ["Decentralized Identity Foundation"]
+version = "0.3.0"
+authors = ["Decentralized Identity Foundation", "Charles Cunningham <charles@jolocom.io>"]
 edition = "2018"
 description = "Core library for the Key Event Receipt Infrastructure "
 license = "Apache-2.0"
@@ -27,3 +27,4 @@ itoa = "0.4"
 ryu = "1.0"
 serde-transcode = "1.1"
 rmp-serde = "0.14"
+blake3 = { version = "0.3", default-features = false }
