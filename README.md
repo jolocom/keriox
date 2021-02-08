@@ -1,3 +1,7 @@
+# THIS REPO WAS MOVED
+Jolocom has donated the keriox (Rust) implementation to [DIF, Decentralized Identity Foundation] (https://identity.foundation/)
+the code has been moved and is maintained now [here] (https://github.com/decentralized-identity/keriox/)
+
 # KERIOX
 
 - [Introduction](#introduction)
